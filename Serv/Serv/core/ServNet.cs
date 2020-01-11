@@ -60,17 +60,19 @@ public class ServNet
 	//开启服务器
 	public void Start(string host, int port)
 	{
-		//定时器
+		//定时器 - 启动 [心跳]
 		timer.Elapsed += new System.Timers.ElapsedEventHandler(HandleMainTimer);
 		timer.AutoReset = false;
 		timer.Enabled = true;
-		//链接池
+
+		//链接池 - 初始化连接池子
 		conns = new Conn[maxConn];
 		for (int i = 0; i < maxConn; i++)
 		{
 			conns[i] = new Conn();
 		}
-		//Socket
+
+		//Socket - 初始化监听 - socket
 		listenfd = new Socket(AddressFamily.InterNetwork,
 		                      SocketType.Stream, ProtocolType.Tcp);
 		//Bind
@@ -85,7 +87,7 @@ public class ServNet
 	}
 	
 	
-	//Accept回调
+	//Accept回调 - 连接请求
 	private void AcceptCb(IAsyncResult ar)
 	{
 		try
@@ -131,6 +133,7 @@ public class ServNet
 		}
 	}
 
+    //收到消息请求
 	private void ReceiveCb(IAsyncResult ar)
 	{
 		Conn conn = (Conn)ar.AsyncState;
@@ -161,6 +164,7 @@ public class ServNet
 		}
 	}
 
+    // -- 处理消息
 	private void ProcessData(Conn conn)
 	{
 		//小于长度字节
@@ -168,7 +172,7 @@ public class ServNet
 		{
 			return;
 		}
-		//消息长度
+		//消息长度 -- 粘包分包 处理
 		Array.Copy(conn.readBuff, conn.lenBytes, sizeof(Int32));
 		conn.msgLength = BitConverter.ToInt32(conn.lenBytes, 0);
 		if(conn.buffCount < conn.msgLength + sizeof(Int32))
@@ -178,8 +182,9 @@ public class ServNet
 		//处理消息
 		ProtocolBase protocol =  proto.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
 		HandleMsg (conn, protocol);
-		//清除已处理的消息
-		int count = conn.buffCount - conn.msgLength - sizeof(Int32);
+
+        //清除已处理的消息 -- 粘包分包 处理
+        int count = conn.buffCount - conn.msgLength - sizeof(Int32);
 		Array.Copy(conn.readBuff, sizeof(Int32) + conn.msgLength,  conn.readBuff, 0, count );
 		conn.buffCount = count ;
 		if(conn.buffCount > 0)
