@@ -57,33 +57,33 @@ public partial class HandleConnMsg
 		//构建返回协议
 		ProtocolBytes protocolRet = new ProtocolBytes ();
 		protocolRet.AddString ("Login");
-		//验证
-		if (!DataMgr.instance.CheckPassWord (id, pw)) 
-		{
-			protocolRet.AddInt(-1);
-			conn.Send (protocolRet);
-			return;
-		}
+		////验证
+		//if (!DataMgr.instance.CheckPassWord (id, pw)) 
+		//{
+		//	protocolRet.AddInt(-1);
+		//	conn.Send (protocolRet);
+		//	return;
+		//}
 		//是否已经登录
-		ProtocolBytes protocolLogout = new ProtocolBytes ();
-		protocolLogout.AddString ("Logout");
-		if (!Player.KickOff (id, protocolLogout)) 
-		{
-			protocolRet.AddInt(-1);
-			conn.Send (protocolRet);
-			return;
-		}
+		//ProtocolBytes protocolLogout = new ProtocolBytes ();
+		//protocolLogout.AddString ("Logout");
+		//if (!Player.KickOff (id, protocolLogout)) 
+		//{
+		//	protocolRet.AddInt(-1);
+		//	conn.Send (protocolRet);
+		//	return;
+		//}
 
 		//获取玩家数据
-		PlayerData playerData = DataMgr.instance.GetPlayerData (id);
-		if (playerData == null)
-		{
-			protocolRet.AddInt(-1);
-			conn.Send (protocolRet);
-			return;
-		}
+		//PlayerData playerData = DataMgr.instance.GetPlayerData (id);
+		//if (playerData == null)
+		//{
+		//	protocolRet.AddInt(-1);
+		//	conn.Send (protocolRet);
+		//	return;
+		//}
 		conn.player = new Player (id, conn);
-		conn.player.data = playerData;
+		//conn.player.data = playerData;
 		//事件触发
 		ServNet.instance.handlePlayerEvent.OnLogin(conn.player);
 
